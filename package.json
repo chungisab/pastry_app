@@ -1,0 +1,17 @@
+{
+  "name": "nyc-pastry-finder",
+  "version": "1.0.0",
+  "description": "Find the best pastries in NYC by aggregating data from multiple sources",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "start:backend": "cd backend && npm start",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": ["nyc", "pastry", "croissant", "bakery", "finder"],
+  "author": "",
+  "license": "MIT"
+}
