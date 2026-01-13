@@ -54,8 +54,24 @@ const NEIGHBORHOOD_COORDS = {
   'flushing': { lat: 40.7654, lng: -73.8318 }
 };
 
+// Search query variations to find more bakeries
+const SEARCH_QUERIES = [
+  '{pastry} bakery',
+  'best {pastry}',
+  'French bakery {pastry}',
+  '{pastry} cafe',
+  'patisserie {pastry}'
+];
+
+// In-memory cache to reduce API calls
+const placeCache = new Map();
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
 /**
  * Search for pastry shops using Google Places API
+ * Enhanced version: searches across multiple neighborhoods and query variations
+ * to maximize coverage within the ~40k monthly request quota
+ *
  * @param {string} pastryType - Type of pastry (e.g., 'croissant', 'chocolate croissant')
  * @param {string} location - Optional neighborhood or borough filter
  * @returns {Promise<Array>} Array of shop results
@@ -67,72 +83,210 @@ async function searchPastryShops(pastryType = 'croissant', location = null) {
   }
 
   try {
-    const searchQuery = `${pastryType} bakery`;
-    let searchLocation = NYC_CENTER;
-    let radius = 15000; // 15km default for NYC-wide search
-
-    // If a specific location is provided, use its coordinates
+    // If specific location requested, do a focused search
     if (location) {
-      const locationLower = location.toLowerCase();
-      if (BOROUGH_COORDS[locationLower]) {
-        searchLocation = BOROUGH_COORDS[locationLower];
-        radius = 8000; // 8km for borough search
-      } else if (NEIGHBORHOOD_COORDS[locationLower]) {
-        searchLocation = NEIGHBORHOOD_COORDS[locationLower];
-        radius = 2000; // 2km for neighborhood search
+      return await searchSingleLocation(pastryType, location);
+    }
+
+    // For NYC-wide search, search across key neighborhoods to get more results
+    // This uses more API quota but finds more unique bakeries
+    const keyNeighborhoods = [
+      'soho', 'tribeca', 'williamsburg', 'greenpoint', 'dumbo',
+      'upper east side', 'upper west side', 'chelsea', 'east village',
+      'lower east side', 'park slope', 'cobble hill', 'astoria'
+    ];
+
+    // Use 2 query variations per neighborhood to maximize coverage
+    const searchPromises = [];
+    const queriesPerNeighborhood = 2;
+
+    for (const neighborhood of keyNeighborhoods) {
+      for (let i = 0; i < queriesPerNeighborhood; i++) {
+        const queryTemplate = SEARCH_QUERIES[i % SEARCH_QUERIES.length];
+        const query = queryTemplate.replace('{pastry}', pastryType);
+        searchPromises.push(searchNeighborhood(query, neighborhood));
       }
     }
 
-    // Text search for pastry shops
+    // Also do a general NYC search with multiple query variations
+    for (const queryTemplate of SEARCH_QUERIES.slice(0, 3)) {
+      const query = queryTemplate.replace('{pastry}', pastryType);
+      searchPromises.push(searchGeneral(query));
+    }
+
+    console.log(`Executing ${searchPromises.length} searches for comprehensive coverage...`);
+    const allResults = await Promise.all(searchPromises);
+
+    // Flatten and deduplicate results by place_id
+    const uniquePlaces = new Map();
+    for (const results of allResults) {
+      for (const place of results) {
+        if (!uniquePlaces.has(place.place_id)) {
+          uniquePlaces.set(place.place_id, place);
+        }
+      }
+    }
+
+    const places = Array.from(uniquePlaces.values());
+    console.log(`Found ${places.length} unique bakeries`);
+
+    // Get detailed info for top 30 places (uses 30 API calls)
+    const detailedResults = await Promise.all(
+      places.slice(0, 30).map(place => getPlaceDetails(place.place_id))
+    );
+
+    return detailedResults.filter(Boolean).map(formatPlaceResult);
+  } catch (error) {
+    console.error('Error fetching from Google Places:', error.message);
+    return getMockGoogleData(pastryType, location);
+  }
+}
+
+/**
+ * Search a single neighborhood
+ */
+async function searchNeighborhood(query, neighborhood) {
+  const cacheKey = `search:${query}:${neighborhood}`;
+  const cached = placeCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const coords = NEIGHBORHOOD_COORDS[neighborhood.toLowerCase()] || NYC_CENTER;
     const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/textsearch/json`, {
       params: {
-        query: `${searchQuery} in New York City`,
-        location: `${searchLocation.lat},${searchLocation.lng}`,
-        radius: radius,
+        query: `${query} in ${neighborhood} New York`,
+        location: `${coords.lat},${coords.lng}`,
+        radius: 2500,
         type: 'bakery',
         key: GOOGLE_API_KEY
       }
     });
 
-    if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
-      console.error('Google Places API error:', response.data.status);
-      return getMockGoogleData(pastryType, location);
-    }
-
-    const places = response.data.results || [];
-
-    // Get detailed info including reviews for top results
-    const detailedResults = await Promise.all(
-      places.slice(0, 10).map(place => getPlaceDetails(place.place_id))
-    );
-
-    return detailedResults.filter(Boolean).map(place => ({
-      source: 'google',
-      placeId: place.place_id,
-      name: place.name,
-      address: place.formatted_address,
-      location: place.geometry?.location,
-      rating: place.rating || 0,
-      reviewCount: place.user_ratings_total || 0,
-      priceLevel: place.price_level,
-      isOpen: place.opening_hours?.open_now,
-      photos: place.photos?.slice(0, 3).map(p =>
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${GOOGLE_API_KEY}`
-      ) || [],
-      reviews: (place.reviews || []).slice(0, 5).map(review => ({
-        author: review.author_name,
-        rating: review.rating,
-        text: review.text,
-        time: review.relative_time_description,
-        profilePhoto: review.profile_photo_url
-      })),
-      url: place.url,
-      website: place.website
-    }));
+    const results = response.data.status === 'OK' ? response.data.results : [];
+    placeCache.set(cacheKey, { data: results, timestamp: Date.now() });
+    return results;
   } catch (error) {
-    console.error('Error fetching from Google Places:', error.message);
-    return getMockGoogleData(pastryType, location);
+    console.error(`Error searching ${neighborhood}:`, error.message);
+    return [];
   }
+}
+
+/**
+ * General NYC-wide search
+ */
+async function searchGeneral(query) {
+  const cacheKey = `search:general:${query}`;
+  const cached = placeCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/textsearch/json`, {
+      params: {
+        query: `${query} in New York City`,
+        location: `${NYC_CENTER.lat},${NYC_CENTER.lng}`,
+        radius: 15000,
+        type: 'bakery',
+        key: GOOGLE_API_KEY
+      }
+    });
+
+    const results = response.data.status === 'OK' ? response.data.results : [];
+    placeCache.set(cacheKey, { data: results, timestamp: Date.now() });
+    return results;
+  } catch (error) {
+    console.error('Error in general search:', error.message);
+    return [];
+  }
+}
+
+/**
+ * Search a single specific location (for filtered searches)
+ */
+async function searchSingleLocation(pastryType, location) {
+  const locationLower = location.toLowerCase();
+  let searchLocation = NYC_CENTER;
+  let radius = 15000;
+
+  if (BOROUGH_COORDS[locationLower]) {
+    searchLocation = BOROUGH_COORDS[locationLower];
+    radius = 8000;
+  } else if (NEIGHBORHOOD_COORDS[locationLower]) {
+    searchLocation = NEIGHBORHOOD_COORDS[locationLower];
+    radius = 2500;
+  }
+
+  // Use multiple query variations even for single location
+  const searchPromises = SEARCH_QUERIES.slice(0, 3).map(async (queryTemplate) => {
+    const query = queryTemplate.replace('{pastry}', pastryType);
+    try {
+      const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/textsearch/json`, {
+        params: {
+          query: `${query} in ${location} New York`,
+          location: `${searchLocation.lat},${searchLocation.lng}`,
+          radius: radius,
+          type: 'bakery',
+          key: GOOGLE_API_KEY
+        }
+      });
+      return response.data.status === 'OK' ? response.data.results : [];
+    } catch (error) {
+      return [];
+    }
+  });
+
+  const allResults = await Promise.all(searchPromises);
+
+  // Deduplicate
+  const uniquePlaces = new Map();
+  for (const results of allResults) {
+    for (const place of results) {
+      if (!uniquePlaces.has(place.place_id)) {
+        uniquePlaces.set(place.place_id, place);
+      }
+    }
+  }
+
+  const places = Array.from(uniquePlaces.values());
+
+  // Get details for top 15 places
+  const detailedResults = await Promise.all(
+    places.slice(0, 15).map(place => getPlaceDetails(place.place_id))
+  );
+
+  return detailedResults.filter(Boolean).map(formatPlaceResult);
+}
+
+/**
+ * Format a place result from the API
+ */
+function formatPlaceResult(place) {
+  return {
+    source: 'google',
+    placeId: place.place_id,
+    name: place.name,
+    address: place.formatted_address,
+    location: place.geometry?.location,
+    rating: place.rating || 0,
+    reviewCount: place.user_ratings_total || 0,
+    priceLevel: place.price_level,
+    isOpen: place.opening_hours?.open_now,
+    photos: place.photos?.slice(0, 3).map(p =>
+      `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${p.photo_reference}&key=${GOOGLE_API_KEY}`
+    ) || [],
+    reviews: (place.reviews || []).slice(0, 5).map(review => ({
+      author: review.author_name,
+      rating: review.rating,
+      text: review.text,
+      time: review.relative_time_description,
+      profilePhoto: review.profile_photo_url
+    })),
+    url: place.url,
+    website: place.website
+  };
 }
 
 /**
