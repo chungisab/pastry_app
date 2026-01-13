@@ -1,22 +1,8 @@
 import React, { useState } from 'react';
 
-function StarRating({ rating, size = 'small' }) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
+function ReviewCard({ review, isEditorial = false }) {
   return (
-    <span className="star-rating">
-      {'★'.repeat(fullStars)}
-      {hasHalfStar && '½'}
-      {'☆'.repeat(emptyStars)}
-    </span>
-  );
-}
-
-function ReviewCard({ review }) {
-  return (
-    <div className="review-card">
+    <div className={`review-card ${isEditorial ? 'editorial' : ''}`}>
       <div className="review-header">
         <span className="review-author">{review.author}</span>
         <span className="review-rating">
@@ -26,6 +12,11 @@ function ReviewCard({ review }) {
       <p className="review-text">{review.text}</p>
       {review.time && (
         <p className="review-time">{review.time}</p>
+      )}
+      {review.url && isEditorial && (
+        <a href={review.url} target="_blank" rel="noopener noreferrer" className="review-link">
+          Read full article →
+        </a>
       )}
     </div>
   );
@@ -41,14 +32,16 @@ function ShopCard({ shop }) {
     return '';
   };
 
-  const getSourceData = (sourceName) => {
-    return shop.sources?.find(s => s.source === sourceName);
-  };
+  // Get sources by type
+  const googleData = shop.sources?.find(s => s.source === 'google');
+  const yelpData = shop.sources?.find(s => s.source === 'yelp');
+  const editorialSources = shop.sources?.filter(s => s.sourceType === 'editorial') || [];
 
-  const googleData = getSourceData('google');
-  const yelpData = getSourceData('yelp');
+  // Count relevant reviews (filtered ones that mention the pastry)
+  const relevantReviewCount = shop.relevantReviewCount || 0;
 
-  const totalReviews = shop.sources?.reduce((sum, s) =>
+  // Total reviews shown (relevant ones only)
+  const totalReviewsShown = shop.sources?.reduce((sum, s) =>
     sum + (s.reviews?.length || 0), 0
   ) || 0;
 
@@ -68,27 +61,32 @@ function ShopCard({ shop }) {
             {shop.borough && (
               <span className="location-tag">{shop.borough}</span>
             )}
+            {shop.editorialMentions > 0 && (
+              <span className="location-tag editorial-tag">
+                📰 {shop.editorialMentions} Press Mention{shop.editorialMentions > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       <div className="shop-scores">
         <div className="score-item">
-          <div className="score-label">Cumulative Score</div>
+          <div className="score-label">Pastry Score</div>
           <div className="score-value cumulative">
-            {shop.cumulativeScore?.toFixed(2) || 'N/A'}
+            {shop.pastryScore?.toFixed(2) || shop.cumulativeScore?.toFixed(2) || 'N/A'}
+          </div>
+        </div>
+        <div className="score-item">
+          <div className="score-label">Relevant Reviews</div>
+          <div className="score-value">
+            {relevantReviewCount}
           </div>
         </div>
         <div className="score-item">
           <div className="score-label">Avg Rating</div>
           <div className="score-value">
             <span className="star">★</span> {shop.averageRating?.toFixed(1) || 'N/A'}
-          </div>
-        </div>
-        <div className="score-item">
-          <div className="score-label">Total Reviews</div>
-          <div className="score-value">
-            {shop.totalReviewCount?.toLocaleString() || 0}
           </div>
         </div>
         <div className="score-item">
@@ -122,20 +120,47 @@ function ShopCard({ shop }) {
               </div>
             </div>
           )}
+          {editorialSources.length > 0 && (
+            <div className="source-badge editorial">
+              <span>Press</span>
+              <div className="source-rating">
+                <span>📰</span>
+                <span>{editorialSources.length} article{editorialSources.length > 1 ? 's' : ''}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {totalReviews > 0 && (
+      {totalReviewsShown > 0 && (
         <div className="reviews-section">
           <button
             className="reviews-toggle"
             onClick={() => setShowReviews(!showReviews)}
           >
-            {showReviews ? '▼' : '▶'} {showReviews ? 'Hide' : 'Show'} Reviews ({totalReviews})
+            {showReviews ? '▼' : '▶'} {showReviews ? 'Hide' : 'Show'} Relevant Reviews ({totalReviewsShown})
           </button>
 
           {showReviews && (
             <div className="reviews-container">
+              {/* Editorial/Press mentions first */}
+              {editorialSources.length > 0 && (
+                <div className="reviews-source">
+                  <div className="reviews-source-header editorial">
+                    <span>📰</span> Press & Publications
+                  </div>
+                  {editorialSources.map((source, idx) =>
+                    source.reviews?.map((review, ridx) => (
+                      <ReviewCard
+                        key={`editorial-${idx}-${ridx}`}
+                        review={review}
+                        isEditorial={true}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+
               {googleData?.reviews?.length > 0 && (
                 <div className="reviews-source">
                   <div className="reviews-source-header google">
@@ -157,8 +182,21 @@ function ShopCard({ shop }) {
                   ))}
                 </div>
               )}
+
+              {totalReviewsShown === 0 && (
+                <p className="no-reviews">
+                  No reviews specifically mentioning this pastry type.
+                  The score is based on the shop's general ratings.
+                </p>
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {totalReviewsShown === 0 && (
+        <div className="no-specific-reviews">
+          <p>No reviews specifically mention this pastry type. Score based on general ratings.</p>
         </div>
       )}
     </article>

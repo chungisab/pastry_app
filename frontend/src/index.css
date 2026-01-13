@@ -348,6 +348,43 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--yelp-color);
 }
 
+.source-badge.editorial {
+  background: rgba(46, 125, 50, 0.1);
+  color: #2E7D32;
+}
+
+.editorial-tag {
+  background: rgba(46, 125, 50, 0.15);
+  color: #2E7D32;
+}
+
+.review-card.editorial {
+  background: rgba(46, 125, 50, 0.05);
+  border-left: 3px solid #2E7D32;
+}
+
+.review-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #2E7D32;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.review-link:hover {
+  text-decoration: underline;
+}
+
+.no-specific-reviews {
+  padding: 16px;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+  color: var(--text-light);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
 .source-rating {
   display: flex;
   align-items: center;
@@ -407,6 +444,11 @@ h1, h2, h3, h4, h5, h6 {
 .reviews-source-header.yelp {
   color: var(--yelp-color);
   border-bottom-color: var(--yelp-color);
+}
+
+.reviews-source-header.editorial {
+  color: #2E7D32;
+  border-bottom-color: #2E7D32;
 }
 
 .review-card {

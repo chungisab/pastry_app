@@ -160,8 +160,10 @@ async function getPlaceDetails(placeId) {
 
 /**
  * Generate mock data for development/demo when API key is not available
+ * Reviews are pastry-specific to enable proper scoring
  */
 function getMockGoogleData(pastryType, location) {
+  // All shops with reviews for different pastry types
   const mockShops = [
     {
       source: 'google',
@@ -177,9 +179,14 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Sarah M.', rating: 5, text: `The ${pastryType} here is absolutely divine! Flaky, buttery perfection.`, time: '2 weeks ago' },
-        { author: 'John D.', rating: 5, text: 'Best croissants in NYC hands down. Worth every penny.', time: '1 month ago' },
-        { author: 'Emily R.', rating: 4, text: 'Amazing pastries but expect to wait in line.', time: '3 weeks ago' }
+        // Plain croissant reviews
+        { author: 'Sarah M.', rating: 5, text: 'The butter croissant here is absolutely divine! Flaky, buttery perfection. Best plain croissant in NYC.', time: '2 weeks ago' },
+        { author: 'John D.', rating: 5, text: 'Their classic croissant is incredible - shatteringly crisp outside, soft and layered inside.', time: '1 month ago' },
+        // Chocolate croissant reviews
+        { author: 'Emily R.', rating: 5, text: 'The pain au chocolat is heavenly - rich dark chocolate wrapped in perfect laminated dough.', time: '3 weeks ago' },
+        { author: 'Kevin L.', rating: 5, text: 'Best chocolate croissant I have ever had. The chocolate is perfectly melted inside.', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Maria G.', rating: 5, text: 'The almond croissant is incredible - filled with fresh almond cream and perfectly toasted.', time: '1 week ago' }
       ]
     },
     {
@@ -196,8 +203,13 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Mike T.', rating: 5, text: `Classic French ${pastryType}s that transport you to Paris.`, time: '1 week ago' },
-        { author: 'Lisa K.', rating: 4, text: 'Consistently good quality. My go-to bakery.', time: '2 weeks ago' }
+        // Plain croissant reviews
+        { author: 'Mike T.', rating: 5, text: 'Classic French butter croissant that transports you to Paris. Perfectly flaky.', time: '1 week ago' },
+        { author: 'Lisa K.', rating: 4, text: 'The plain croissant is consistently good. My go-to morning treat.', time: '2 weeks ago' },
+        // Chocolate croissant reviews
+        { author: 'David W.', rating: 4, text: 'Good pain au chocolat but the chocolate could be darker. Still delicious though.', time: '3 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Sophie B.', rating: 5, text: 'The almond croissant is outstanding - generous frangipane filling and perfectly caramelized.', time: '1 week ago' }
       ]
     },
     {
@@ -214,8 +226,14 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Brooklyn',
       photos: [],
       reviews: [
-        { author: 'Anna P.', rating: 5, text: `Their ${pastryType} is a work of art. Perfect layers every time.`, time: '3 days ago' },
-        { author: 'Robert H.', rating: 5, text: 'Brooklyn gem! The best pastries this side of the river.', time: '1 week ago' }
+        // Plain croissant reviews
+        { author: 'Anna P.', rating: 5, text: 'Their butter croissant is a work of art. Perfect layers, incredible flavor from the long fermentation.', time: '3 days ago' },
+        { author: 'Robert H.', rating: 5, text: 'Best plain croissant in Brooklyn! The 3-day lamination process makes all the difference.', time: '1 week ago' },
+        // Chocolate croissant reviews
+        { author: 'Claire M.', rating: 5, text: 'The pain au chocolat uses Valrhona chocolate - rich, not too sweet, absolutely perfect.', time: '5 days ago' },
+        { author: 'James K.', rating: 5, text: 'Chocolate croissant is phenomenal. The chocolate stays gooey inside while the pastry is crisp.', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Nina R.', rating: 4, text: 'The almond croissant is good but quite sweet. Beautiful presentation though.', time: '1 week ago' }
       ]
     },
     {
@@ -232,8 +250,13 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Chris L.', rating: 5, text: 'Hidden gem in Tribeca. Croissants are perfection.', time: '5 days ago' },
-        { author: 'Diana S.', rating: 5, text: `The ${pastryType} here rivals anything in Paris.`, time: '2 weeks ago' }
+        // Plain croissant reviews
+        { author: 'Chris L.', rating: 5, text: 'Hidden gem in Tribeca. The plain croissant is perfection - shatteringly crisp, deeply buttery.', time: '5 days ago' },
+        { author: 'Diana S.', rating: 5, text: 'The butter croissant here rivals anything in Paris. Incredible lamination.', time: '2 weeks ago' },
+        // Chocolate croissant reviews
+        { author: 'Paul N.', rating: 5, text: 'The chocolate croissant is outstanding - dark chocolate, not overly sweet, perfect texture.', time: '1 week ago' },
+        // Almond croissant reviews
+        { author: 'Rebecca T.', rating: 5, text: 'Almond croissant is amazing - generous almond cream filling, beautiful toasted almonds on top.', time: '3 days ago' }
       ]
     },
     {
@@ -250,8 +273,14 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Brooklyn',
       photos: [],
       reviews: [
-        { author: 'Tom W.', rating: 5, text: 'Authentic French bakery in DUMBO. Amazing croissants!', time: '1 week ago' },
-        { author: 'Rachel G.', rating: 4, text: 'Great pastries with a view of the bridge.', time: '3 weeks ago' }
+        // Plain croissant reviews
+        { author: 'Tom W.', rating: 5, text: 'Authentic French bakery in DUMBO. The butter croissant is amazing - so flaky!', time: '1 week ago' },
+        { author: 'Rachel G.', rating: 4, text: 'Great plain croissant with a view of the bridge. Lovely breakfast spot.', time: '3 weeks ago' },
+        // Chocolate croissant reviews
+        { author: 'Henry L.', rating: 5, text: 'The pain au chocolat is excellent - two generous chocolate batons, perfectly baked.', time: '4 days ago' },
+        { author: 'Susan K.', rating: 4, text: 'Good chocolate croissant, though I wish it had more chocolate. Still tasty!', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Frank M.', rating: 5, text: 'The almond croissant is divine - fresh almond paste, not too sweet, perfectly toasted.', time: '1 week ago' }
       ]
     },
     {
@@ -268,8 +297,13 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Julie F.', rating: 4, text: 'Reliable French bakery chain. Croissants are always fresh.', time: '4 days ago' },
-        { author: 'Mark B.', rating: 5, text: `Love their ${pastryType}! Perfect with coffee.`, time: '1 week ago' }
+        // Plain croissant reviews
+        { author: 'Julie F.', rating: 4, text: 'Reliable French bakery chain. Plain croissant is always fresh and buttery.', time: '4 days ago' },
+        { author: 'Mark B.', rating: 4, text: 'Good butter croissant, consistent quality across locations.', time: '1 week ago' },
+        // Chocolate croissant reviews
+        { author: 'Linda P.', rating: 4, text: 'The pain au chocolat is decent - good for a chain bakery.', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Greg S.', rating: 3, text: 'Almond croissant was disappointing - too much sugar, not enough almond flavor.', time: '1 week ago' }
       ]
     },
     {
@@ -286,8 +320,13 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Brooklyn',
       photos: [],
       reviews: [
-        { author: 'Nicole A.', rating: 5, text: 'Australian bakery with incredible pastries.', time: '6 days ago' },
-        { author: 'Steven C.', rating: 4, text: 'Great croissants in a hip neighborhood.', time: '2 weeks ago' }
+        // Plain croissant reviews
+        { author: 'Nicole A.', rating: 5, text: 'Australian bakery with incredible plain croissant - crispy, buttery, perfect.', time: '6 days ago' },
+        { author: 'Steven C.', rating: 4, text: 'Great butter croissant in a hip neighborhood. Love this spot.', time: '2 weeks ago' },
+        // Chocolate croissant reviews
+        { author: 'Amy T.', rating: 3, text: 'The chocolate croissant was mediocre - a bit dry and the chocolate was underwhelming.', time: '1 week ago' },
+        // Almond croissant reviews
+        { author: 'Peter L.', rating: 5, text: 'The almond croissant is phenomenal - rich almond cream, perfectly flaky pastry.', time: '4 days ago' }
       ]
     },
     {
@@ -304,8 +343,57 @@ function getMockGoogleData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Amy L.', rating: 5, text: 'Creative pastries! Their cruffins are legendary.', time: '3 days ago' },
-        { author: 'Ben K.', rating: 5, text: `Incredible ${pastryType}s with unique flavors.`, time: '1 week ago' }
+        // Plain croissant reviews
+        { author: 'Amy L.', rating: 5, text: 'Their plain butter croissant is exceptional - honeycomb interior, shattering crust.', time: '3 days ago' },
+        { author: 'Ben K.', rating: 5, text: 'Incredible croissant technique. The plain one is a must-try before their fancy flavors.', time: '1 week ago' },
+        // Chocolate croissant reviews
+        { author: 'Mia S.', rating: 4, text: 'The chocolate croissant is good but their specialty cruffins are better.', time: '5 days ago' },
+        // Almond croissant reviews
+        { author: 'Jake R.', rating: 5, text: 'Best almond croissant in the city! Twice-baked with house-made almond cream.', time: '2 weeks ago' }
+      ]
+    },
+    {
+      source: 'google',
+      placeId: 'mock_google_9',
+      name: 'Patisserie Chanson',
+      address: '20 W 23rd St, New York, NY 10010',
+      location: { lat: 40.7421, lng: -73.9907 },
+      rating: 4.4,
+      reviewCount: 1456,
+      priceLevel: 2,
+      isOpen: true,
+      neighborhood: 'Flatiron',
+      borough: 'Manhattan',
+      photos: [],
+      reviews: [
+        // Plain croissant reviews
+        { author: 'Victoria L.', rating: 4, text: 'Elegant patisserie with a solid butter croissant. Nice flaky layers.', time: '1 week ago' },
+        // Chocolate croissant reviews
+        { author: 'Michael C.', rating: 5, text: 'The pain au chocolat is beautiful and delicious - dark chocolate, perfect pastry.', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Emma W.', rating: 5, text: 'The almond croissant is stunning - filled with rich frangipane, topped with sliced almonds.', time: '4 days ago' }
+      ]
+    },
+    {
+      source: 'google',
+      placeId: 'mock_google_10',
+      name: 'Lafayette Grand Cafe',
+      address: '380 Lafayette St, New York, NY 10003',
+      location: { lat: 40.7267, lng: -73.9926 },
+      rating: 4.3,
+      reviewCount: 3421,
+      priceLevel: 3,
+      isOpen: true,
+      neighborhood: 'NoHo',
+      borough: 'Manhattan',
+      photos: [],
+      reviews: [
+        // Plain croissant reviews
+        { author: 'Stephanie R.', rating: 4, text: 'Beautiful space with a good butter croissant. Great for brunch.', time: '1 week ago' },
+        // Chocolate croissant reviews
+        { author: 'Daniel M.', rating: 5, text: 'The chocolate croissant is excellent - properly made with quality chocolate.', time: '2 weeks ago' },
+        // Almond croissant reviews
+        { author: 'Olivia H.', rating: 4, text: 'Nice almond croissant though a bit pricey for the size.', time: '3 weeks ago' }
       ]
     }
   ];

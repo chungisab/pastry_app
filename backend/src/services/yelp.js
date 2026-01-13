@@ -104,6 +104,7 @@ async function getBusinessReviews(businessId) {
 
 /**
  * Generate mock data for development/demo when API key is not available
+ * Reviews are pastry-specific to enable proper scoring
  */
 function getMockYelpData(pastryType, location) {
   const mockShops = [
@@ -122,9 +123,14 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Jennifer L.', rating: 5, text: `OMG the ${pastryType} here changed my life! So buttery and flaky.`, time: '2024-01-05' },
-        { author: 'Kevin M.', rating: 5, text: 'Famous for the cronut but their croissants are equally amazing.', time: '2024-01-02' },
-        { author: 'Samantha R.', rating: 4, text: 'Pricey but worth it for special occasions.', time: '2023-12-28' }
+        // Plain croissant reviews
+        { author: 'Jennifer L.', rating: 5, text: 'The butter croissant here changed my life! So buttery and flaky with perfect layers.', time: '2024-01-05' },
+        { author: 'Kevin M.', rating: 5, text: 'Famous for the cronut but their plain croissant is equally amazing - crisp and delicious.', time: '2024-01-02' },
+        // Chocolate croissant reviews
+        { author: 'Samantha R.', rating: 5, text: 'The pain au chocolat is incredible - two sticks of dark chocolate in perfect pastry.', time: '2023-12-28' },
+        { author: 'Brandon T.', rating: 5, text: 'Best chocolate croissant in NYC! The chocolate is perfectly melted, the pastry is flaky.', time: '2024-01-03' },
+        // Almond croissant reviews
+        { author: 'Nicole H.', rating: 5, text: 'The almond croissant is divine - rich almond cream, toasted almonds, not too sweet.', time: '2024-01-01' }
       ]
     },
     {
@@ -142,8 +148,13 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'David W.', rating: 5, text: 'Classic NYC institution. Their croissants are legendary.', time: '2024-01-03' },
-        { author: 'Laura B.', rating: 4, text: `Great ${pastryType}s paired with their amazing coffee.`, time: '2023-12-30' }
+        // Plain croissant reviews
+        { author: 'David W.', rating: 5, text: 'Classic NYC institution. Their butter croissant is legendary - perfectly flaky.', time: '2024-01-03' },
+        { author: 'Laura B.', rating: 4, text: 'Great plain croissant paired with their amazing coffee. A SoHo classic.', time: '2023-12-30' },
+        // Chocolate croissant reviews
+        { author: 'Marcus L.', rating: 4, text: 'The pain au chocolat is good but a bit pricey. Chocolate could be darker.', time: '2024-01-02' },
+        // Almond croissant reviews
+        { author: 'Caroline M.', rating: 5, text: 'The almond croissant is outstanding - generous frangipane, perfectly toasted.', time: '2024-01-04' }
       ]
     },
     {
@@ -161,8 +172,14 @@ function getMockYelpData(pastryType, location) {
       borough: 'Brooklyn',
       photos: [],
       reviews: [
-        { author: 'Michelle T.', rating: 5, text: 'Best bakery in Brooklyn! Their pastries are perfection.', time: '2024-01-04' },
-        { author: 'Andrew J.', rating: 5, text: `The ${pastryType} is crispy on the outside, soft inside. Heaven!`, time: '2024-01-01' }
+        // Plain croissant reviews
+        { author: 'Michelle T.', rating: 5, text: 'Best plain croissant in Brooklyn! 3-day lamination makes it incredibly flaky.', time: '2024-01-04' },
+        { author: 'Andrew J.', rating: 5, text: 'The butter croissant is crispy on the outside, soft inside. Heaven!', time: '2024-01-01' },
+        // Chocolate croissant reviews
+        { author: 'Jessica W.', rating: 5, text: 'Pain au chocolat with Valrhona chocolate - rich, perfectly balanced, amazing.', time: '2024-01-03' },
+        { author: 'Tyler R.', rating: 5, text: 'The chocolate croissant is phenomenal. Gooey chocolate, shattering pastry.', time: '2023-12-29' },
+        // Almond croissant reviews
+        { author: 'Heather K.', rating: 4, text: 'Almond croissant is good but quite rich. Beautiful presentation.', time: '2024-01-02' }
       ]
     },
     {
@@ -180,8 +197,13 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Catherine H.', rating: 5, text: 'Hidden in an office building lobby - such a cool spot!', time: '2024-01-06' },
-        { author: 'James P.', rating: 5, text: 'Croissants are phenomenal. Best kept secret in Tribeca.', time: '2023-12-29' }
+        // Plain croissant reviews
+        { author: 'Catherine H.', rating: 5, text: 'Hidden gem! The plain croissant is perfection - shatteringly crisp, deeply buttery.', time: '2024-01-06' },
+        { author: 'James P.', rating: 5, text: 'Butter croissant is phenomenal. Best kept secret in Tribeca.', time: '2023-12-29' },
+        // Chocolate croissant reviews
+        { author: 'Allison F.', rating: 5, text: 'The chocolate croissant is outstanding - quality dark chocolate, perfect texture.', time: '2024-01-04' },
+        // Almond croissant reviews
+        { author: 'Derek M.', rating: 5, text: 'Almond croissant is incredible - rich filling, toasted almonds, perfect balance.', time: '2024-01-02' }
       ]
     },
     {
@@ -199,8 +221,13 @@ function getMockYelpData(pastryType, location) {
       borough: 'Brooklyn',
       photos: [],
       reviews: [
-        { author: 'Emma S.', rating: 5, text: 'French bakery in the heart of DUMBO. Pastries are amazing!', time: '2024-01-02' },
-        { author: 'Ryan K.', rating: 4, text: `Good ${pastryType}s, great location near the bridge.`, time: '2023-12-31' }
+        // Plain croissant reviews
+        { author: 'Emma S.', rating: 5, text: 'French bakery in DUMBO. The butter croissant is amazing - perfectly flaky!', time: '2024-01-02' },
+        { author: 'Ryan K.', rating: 4, text: 'Good plain croissant, great location near the bridge.', time: '2023-12-31' },
+        // Chocolate croissant reviews
+        { author: 'Monica L.', rating: 5, text: 'Pain au chocolat is excellent - two generous chocolate batons, perfectly baked.', time: '2024-01-04' },
+        // Almond croissant reviews
+        { author: 'Ian B.', rating: 5, text: 'The almond croissant is divine - fresh almond paste, beautifully toasted.', time: '2024-01-03' }
       ]
     },
     {
@@ -218,8 +245,13 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Patricia N.', rating: 4, text: 'Solid French bakery chain. Consistent quality every time.', time: '2024-01-05' },
-        { author: 'George F.', rating: 4, text: 'Nice spot for breakfast pastries in the UES.', time: '2023-12-27' }
+        // Plain croissant reviews
+        { author: 'Patricia N.', rating: 4, text: 'Solid chain bakery. Plain croissant is always fresh and buttery.', time: '2024-01-05' },
+        { author: 'George F.', rating: 4, text: 'Nice butter croissant for breakfast in the UES. Consistent.', time: '2023-12-27' },
+        // Chocolate croissant reviews
+        { author: 'Helen S.', rating: 4, text: 'Decent pain au chocolat - good for a chain, nothing exceptional.', time: '2024-01-03' },
+        // Almond croissant reviews
+        { author: 'Richard M.', rating: 3, text: 'Almond croissant was disappointing - too sweet, not enough almond flavor.', time: '2024-01-01' }
       ]
     },
     {
@@ -237,14 +269,18 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Victoria L.', rating: 5, text: `Elegant patisserie with beautiful ${pastryType}s.`, time: '2024-01-04' },
-        { author: 'Michael C.', rating: 4, text: 'Great desserts and pastries in a chic setting.', time: '2023-12-30' }
+        // Plain croissant reviews
+        { author: 'Victoria L.', rating: 4, text: 'Elegant patisserie with a solid butter croissant. Nice flaky layers.', time: '2024-01-04' },
+        // Chocolate croissant reviews
+        { author: 'Michael C.', rating: 5, text: 'The pain au chocolat is beautiful - dark chocolate, perfect pastry.', time: '2023-12-30' },
+        // Almond croissant reviews
+        { author: 'Sandra P.', rating: 5, text: 'Almond croissant is stunning - rich frangipane, topped with sliced almonds.', time: '2024-01-02' }
       ]
     },
     {
       source: 'yelp',
       yelpId: 'mock_yelp_8',
-      name: 'Lafayette Grand Cafe & Bakery',
+      name: 'Lafayette Grand Cafe',
       address: '380 Lafayette St, New York, NY 10003',
       location: { lat: 40.7267, lng: -73.9926 },
       rating: 4.3,
@@ -256,8 +292,60 @@ function getMockYelpData(pastryType, location) {
       borough: 'Manhattan',
       photos: [],
       reviews: [
-        { author: 'Stephanie R.', rating: 4, text: 'Beautiful space with excellent French pastries.', time: '2024-01-03' },
-        { author: 'Daniel M.', rating: 5, text: `Their ${pastryType} with coffee is my perfect morning.`, time: '2024-01-01' }
+        // Plain croissant reviews
+        { author: 'Stephanie R.', rating: 4, text: 'Beautiful space with a good butter croissant. Great for brunch.', time: '2024-01-03' },
+        // Chocolate croissant reviews
+        { author: 'Daniel M.', rating: 5, text: 'The chocolate croissant with coffee is my perfect morning. Excellent quality.', time: '2024-01-01' },
+        // Almond croissant reviews
+        { author: 'Christina L.', rating: 4, text: 'Nice almond croissant though a bit pricey for the size.', time: '2023-12-28' }
+      ]
+    },
+    {
+      source: 'yelp',
+      yelpId: 'mock_yelp_9',
+      name: 'Supermoon Bakehouse',
+      address: '120 Rivington St, New York, NY 10002',
+      location: { lat: 40.7196, lng: -73.9852 },
+      rating: 4.6,
+      reviewCount: 1876,
+      priceLevel: 2,
+      isClosed: false,
+      categories: ['Bakeries', 'Desserts'],
+      neighborhood: 'Lower East Side',
+      borough: 'Manhattan',
+      photos: [],
+      reviews: [
+        // Plain croissant reviews
+        { author: 'Ashley K.', rating: 5, text: 'The plain butter croissant is exceptional - honeycomb interior, crispy crust.', time: '2024-01-05' },
+        { author: 'Brandon L.', rating: 5, text: 'Incredible croissant technique. Must try the plain one before the fancy flavors.', time: '2024-01-02' },
+        // Chocolate croissant reviews
+        { author: 'Natalie R.', rating: 4, text: 'Chocolate croissant is good but their specialty cruffins are the star.', time: '2024-01-04' },
+        // Almond croissant reviews
+        { author: 'Justin W.', rating: 5, text: 'Best almond croissant in the city! Twice-baked with house-made almond cream.', time: '2024-01-01' }
+      ]
+    },
+    {
+      source: 'yelp',
+      yelpId: 'mock_yelp_10',
+      name: 'Bourke Street Bakery',
+      address: '68 Franklin St, Brooklyn, NY 11222',
+      location: { lat: 40.7282, lng: -73.9485 },
+      rating: 4.4,
+      reviewCount: 1234,
+      priceLevel: 2,
+      isClosed: false,
+      categories: ['Bakeries', 'Australian', 'Coffee & Tea'],
+      neighborhood: 'Greenpoint',
+      borough: 'Brooklyn',
+      photos: [],
+      reviews: [
+        // Plain croissant reviews
+        { author: 'Lindsay M.', rating: 5, text: 'Australian bakery with an incredible plain croissant. Crispy and buttery.', time: '2024-01-06' },
+        { author: 'Chris T.', rating: 4, text: 'Great butter croissant in a hip Greenpoint location.', time: '2024-01-03' },
+        // Chocolate croissant reviews
+        { author: 'Megan F.', rating: 3, text: 'Chocolate croissant was mediocre - a bit dry, chocolate underwhelming.', time: '2024-01-02' },
+        // Almond croissant reviews
+        { author: 'Patrick O.', rating: 5, text: 'The almond croissant is phenomenal - rich almond cream, flaky pastry.', time: '2024-01-04' }
       ]
     }
   ];
